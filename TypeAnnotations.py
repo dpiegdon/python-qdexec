@@ -17,16 +17,18 @@ def typecheck(fun, *args, **kwargs):
         if name in fun.__annotations__:
             if not isinstance(val, fun.__annotations__[name]):
                 raise TypeError("Expected argument '" + name + "' of type " +
-                                "{} but got {}.".format(
-                                        fun.__annotations__[name], type(val)))
+                                "<{}> but got <{}>.".format(
+                                        fun.__annotations__[name].__name__,
+                                        type(val).__name__))
     # call wrapped function
     result = fun(*args, **kwargs)
     # check return value
     if "return" in fun.__annotations__:
         if not isinstance(result, fun.__annotations__["return"]):
             raise TypeError("Expected return of type " +
-                            "{} but got {}.".format(
-                                fun.__annotations__["return"], type(result)))
+                            "<{}> but got <{}>.".format(
+                                fun.__annotations__["return"].__name__,
+                                type(result).__name__))
     # return result from wrapped function
     return result
 
@@ -47,8 +49,9 @@ def parameter_typecast(fun, *args, **kwargs):
             try:
                 casted_args[name] = annotations[name](val)
             except ValueError as e:
-                raise ValueError("Failed to typecast parameter " +
-                                 "{}: {}".format(name, e))
+                raise ValueError("Failed to typecast argument '" + name + "'" +
+                                 " to <{}>: {}".format(
+                                     annotations[name].__name__, e))
         else:
             casted_args[name] = val
     return fun(**casted_args)
@@ -69,5 +72,7 @@ def returnvalue_typecast(fun, *args, **kwargs):
         try:
             result = annotations["return"](result)
         except ValueError as e:
-            raise ValueError("Failed to typecast return value: {}".format(e))
+            raise ValueError("Failed to typecast return value to " +
+                             "<{}>: {}".format(
+                                 annotations["return"].__name__, e))
     return result

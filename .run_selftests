@@ -5,7 +5,9 @@ fail() {
 	exit -1
 }
 
+# run linter checks:
 pep8 *.py || fail
 pyflakes . || fail
+
 echo "PASS"
 
