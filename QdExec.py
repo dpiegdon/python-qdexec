@@ -4,14 +4,19 @@ import TypeAnnotations
 import inspect
 import os
 import collections
+import logging
 
 
 class QdExec():
     """ The Quick and Dirty command Executor """
 
-    def __init__(self):
+    def __init__(self, logger_name=None):
         super().__init__()
         self.registry = collections.OrderedDict()
+        self.logger = logging.getLogger(logger_name)
+
+    def get_logger(self):
+        return self.logger
 
     def register(self, fun):
         """ force typecasing/checking and register function for command execution
@@ -31,30 +36,31 @@ class QdExec():
     def print_help(self):
         """ print help on all registered commands """
         name_width = 3 + max((len(name) for name in self.registry.keys()))
-        print("Available commands:")
-        print()
+        self.logger.warning("Available commands:")
+        self.logger.warning("")
         for name in self.registry:
             command = self.registry[name]
             doc_short = "(no help available)"
             if command.__doc__ is not None:
                 doc_short = command.__doc__.lstrip().split("\n")[0]
-            print("{} {}".format(command.__name__, inspect.signature(command)))
-            print(" " * name_width + doc_short)
+            self.logger.warning("{} {}".format(command.__name__,
+                                               inspect.signature(command)))
+            self.logger.warning(" " * name_width + doc_short)
 
     def print_command_help(self, commandname):
         """ print help on specified command """
         command = self.registry[commandname]
-        print("{} {}".format(command.__name__,
-                             inspect.signature(command)))
+        self.logger.warning("{} {}".format(command.__name__,
+                            inspect.signature(command)))
         if command.__doc__ is not None:
-            print()
-            print(command.__doc__.lstrip())
+            self.logger.warning("")
+            self.logger.warning(command.__doc__.lstrip())
 
     def print_long_help(self):
         """ print long help on all registered commands """
-        print("Available commands:")
+        self.logger.warning("Available commands:")
         for name in self.registry:
-            print()
+            self.logger.warning("")
             self.print_command_help(name)
 
     def execute(self, argv, reduced_basename=True):
@@ -83,13 +89,13 @@ class QdExec():
             try:
                 return command(*params)
             except Exception as e:
-                print("ERROR: {}".format(e))
-                print("Failed to execute '{}'.".format(commandname))
-                print()
+                self.logger.error("ERROR: {}".format(e))
+                self.logger.error("Failed to execute '" + commandname + "'.")
+                self.logger.error("")
                 self.print_command_help(commandname)
                 return -1
         else:
-            print("Unknown command '{}'!".format(commandname))
-            print()
+            self.logger.error("Unknown command '{}'!".format(commandname))
+            self.logger.error("")
             self.print_help()
             return -1
