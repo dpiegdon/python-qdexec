@@ -1,6 +1,5 @@
 
 import decorator
-import functools
 import inspect
 
 
@@ -17,17 +16,17 @@ def typecheck(fun, *args, **kwargs):
     for name, val in inspect.getcallargs(fun, *args, **kwargs).items():
         if name in fun.__annotations__:
             if not isinstance(val, fun.__annotations__[name]):
-                raise TypeError("Expected argument "
-                                + "'{}' of type {} but got {}.".format(
-                                    name, fun.__annotations__[name], type(val)))
+                raise TypeError("Expected argument '" + name + "' of type " +
+                                "{} but got {}.".format(
+                                        fun.__annotations__[name], type(val)))
     # call wrapped function
     result = fun(*args, **kwargs)
     # check return value
     if "return" in fun.__annotations__:
         if not isinstance(result, fun.__annotations__["return"]):
-            raise TypeError("Expected return of type "
-                            + "{} but got {}.".format(
-                                   fun.__annotations__["return"], type(result)))
+            raise TypeError("Expected return of type " +
+                            "{} but got {}.".format(
+                                fun.__annotations__["return"], type(result)))
     # return result from wrapped function
     return result
 
@@ -48,7 +47,8 @@ def parameter_typecast(fun, *args, **kwargs):
             try:
                 casted_args[name] = annotations[name](val)
             except ValueError as e:
-                raise ValueError("Failed to typecast parameter {}: {}".format(name, e))
+                raise ValueError("Failed to typecast parameter " +
+                                 "{}: {}".format(name, e))
         else:
             casted_args[name] = val
     return fun(**casted_args)

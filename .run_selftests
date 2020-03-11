@@ -1,0 +1,11 @@
+#!/bin/sh
+
+fail() {
+	echo "FAIL"
+	exit -1
+}
+
+pep8 *.py || fail
+pyflakes . || fail
+echo "PASS"
+

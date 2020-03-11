@@ -7,7 +7,7 @@ import collections
 
 
 class QdParser():
-    """ The Quick and Dirty shell command parser """
+    """ The Quick and Dirty shell command Parser """
 
     def __init__(self):
         super().__init__()
@@ -18,8 +18,8 @@ class QdParser():
 
         register a function as shell command.
         can also be used as a decorator.
-        functions are changed to automatically typecast and typecheck parameters
-        and the return value where an annotation defines types.
+        functions are changed to automatically typecast and typecheck
+        parameters and the return value where an annotation defines types.
         """
         name = fun.__name__
         fun = TypeAnnotations.parameter_typecast(
@@ -28,7 +28,7 @@ class QdParser():
         self.registry[name] = fun
         return fun
 
-    def print_help(self, ):
+    def print_help(self):
         name_width = 3 + max((len(name) for name in self.registry.keys()))
         print("Available commands:")
         print()
@@ -41,7 +41,8 @@ class QdParser():
             print(" " * name_width + doc_short)
 
     def execute(self, argv):
-        # FIXME add handling of '--' to allow passing of generic params to self:
+        # FIXME add handling of '--' to allow passing of
+        # generic params to self:
         # things like --help, --verbose, --loglevel x and alike
         # and anything behing '--' is teated as params to fun
         basename = os.path.basename(argv[0])
@@ -51,11 +52,11 @@ class QdParser():
             try:
                 return command(*params)
             except Exception as e:
-                print()
-                print("Failed to execute command '{}':".format(basename))
                 print("{}".format(e))
+                print("Failed to execute command '{}'.".format(basename))
                 print()
-                print("{} {}".format(command.__name__, inspect.signature(command)))
+                print("{} {}".format(command.__name__,
+                                     inspect.signature(command)))
                 if command.__doc__ is not None:
                     print()
                     print(command.__doc__.lstrip())
@@ -65,4 +66,3 @@ class QdParser():
             print()
             self.print_help()
             return -1
-
