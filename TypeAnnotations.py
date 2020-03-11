@@ -1,10 +1,7 @@
-#!/usr/bin/python3
 
 import decorator
 import functools
 import inspect
-import sys
-import os
 
 
 @decorator.decorator
@@ -51,7 +48,7 @@ def parameter_typecast(fun, *args, **kwargs):
             try:
                 casted_args[name] = annotations[name](val)
             except ValueError as e:
-                raise TypeError("Failed to typecast parameter {}: {}".format(name, e))
+                raise ValueError("Failed to typecast parameter {}: {}".format(name, e))
         else:
             casted_args[name] = val
     return fun(**casted_args)
@@ -72,65 +69,5 @@ def returnvalue_typecast(fun, *args, **kwargs):
         try:
             result = annotations["return"](result)
         except ValueError as e:
-            raise TypeError("Failed to typecast return value: {}".format(e))
+            raise ValueError("Failed to typecast return value: {}".format(e))
     return result
-
-
-shell_command_registry = {}
-def register_as_shell_command(fun):
-    """ register a function for shell command execution
-
-    register a function or shell command into the given context.
-    can also be used as a decorator. """
-    shell_command_registry[fun.__name__] = fun
-    return fun
-
-
-def execute_shell_command(argv):
-    # FIXME add handling of '--' to allow passing of generic params to self:
-    # things like --help, --verbose, --loglevel x and alike
-    # and anything behing '--' is teated as params to fun
-    basename = os.path.basename(argv[0])
-    params = argv[1:]
-    if basename in shell_command_registry:
-        command = shell_command_registry[basename]
-        try:
-            sys.exit(command(*params))
-        except Exception as e:
-            print()
-            print("Failed to execute command '{}':".format(basename))
-            print("{}".format(e))
-            print()
-            print("{} {}".format(command.__name__, inspect.signature(command)))
-            if command.__doc__ is not None:
-                print()
-                print(command.__doc__.lstrip())
-            sys.exit(-1)
-    else:
-        name_width = 3 + max((len(name) for name in shell_command_registry.keys()))
-        print("Unknown command '{}'!".format(basename))
-        print()
-        print("Available commands:")
-        print()
-        for name in shell_command_registry:
-            command = shell_command_registry[name]
-            doc_short = "(no help available)"
-            if command.__doc__ is not None:
-                doc_short = command.__doc__.lstrip().split("\n")[0]
-            print("{} {}".format(command.__name__, inspect.signature(command)))
-            print(" " * name_width + doc_short)
-        sys.exit(-1)
-
-
-@register_as_shell_command
-@parameter_typecast
-@typecheck
-@returnvalue_typecast
-def somefun(foo: int, bar: str) -> int:
-    """ some random function doing something (tm)"""
-    print("this is the result of <somefun({}, {})>".format(foo, bar))
-    return foo
-
-
-if __name__ == "__main__":
-    execute_shell_command(sys.argv)
