@@ -39,4 +39,4 @@ def testfun_type(foo: SomeType) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(executor.execute(sys.argv))
+    executor.exec_argv_exit()

@@ -5,6 +5,7 @@ import collections
 import inspect
 import logging
 import os
+import sys
 
 
 class QdExec():
@@ -197,3 +198,6 @@ class QdExec():
             self.logger.error("")
             self.print_help()
             return -1
+
+    def exec_argv_exit(self):
+        sys.exit(self.execute(sys.argv))
