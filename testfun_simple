@@ -1,1 +1,39 @@
-testfun
+#!/usr/bin/python3
+
+import QdExec
+executor = QdExec.QdExec()
+
+
+@executor.register
+def testfun_simple(foo: int, bar: str) -> int:
+    """ some random function doing something (tm)
+
+    also this is pretty booooring.
+    """
+    print("this is the result of <somefun({}, {})>".format(foo, bar))
+    return foo
+
+
+class SomeType():
+    def __init__(self, string):
+        self.str = string
+
+    def __str__(self):
+        return "SomeType(\"" + self.str + "\")"
+
+    def getint(self):
+        try:
+            return int(self.str)
+        except Exception:
+            return 0
+
+
+@executor.register
+def testfun_type(foo: SomeType) -> int:
+    """ testfunction for complex input types """
+    print(foo)
+    return foo.getint()
+
+
+if __name__ == "__main__":
+    executor.exec_argv_exit()

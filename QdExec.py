@@ -1,4 +1,3 @@
-
 import TypeAnnotations
 
 import collections
@@ -74,7 +73,8 @@ class QdExec():
         while len(params):
             param = params[0]
             if param in self.internal_params:
-                params = self.internal_params[param].callback(commandname, params[1:])
+                params = self.internal_params[param].callback(commandname,
+                                                              params[1:])
                 if params is None:
                     return False
             else:
@@ -110,11 +110,13 @@ class QdExec():
     def print_internal_help(self):
         """ print help on all available internal parameters """
         self.logger.warning("Expected parameters:")
-        self.logger.warning("    [<internal parameters> --] [command parameters]")
+        self.logger.warning("    [<internal parameters> --]" +
+                            " [command parameters]")
         self.logger.warning("")
         self.logger.warning("available internal parameters:")
         for iparam in self.internal_params:
-            self.logger.warning("    {}: {}".format(iparam, self.internal_params[iparam].help))
+            self.logger.warning("    " + iparam + ": " +
+                                self.internal_params[iparam].help)
 
     def print_help(self):
         """ print help on all registered commands """
@@ -132,7 +134,7 @@ class QdExec():
                                                inspect.signature(command)))
             self.logger.warning(" " * name_width + doc_short)
 
-    def print_command_help(self, commandname):
+    def print_command_help(self, commandname, print_internals=True):
         """ print help on specified command """
         if commandname in self.registry:
             command = self.registry[commandname]
@@ -141,6 +143,9 @@ class QdExec():
             if command.__doc__ is not None:
                 self.logger.warning("")
                 self.logger.warning(command.__doc__)
+            if print_internals:
+                self.logger.warning("")
+                self.print_internal_help()
         else:
             self.logger.warning("unknown command: "+commandname)
 
@@ -151,7 +156,7 @@ class QdExec():
         self.logger.warning("Available commands:")
         for name in self.registry:
             self.logger.warning("")
-            self.print_command_help(name)
+            self.print_command_help(name, print_internals=False)
 
     def execute(self, argv, reduced_basename=True):
         """ find and execute command with given arguments
@@ -176,7 +181,8 @@ class QdExec():
                 split = params.index("--")
                 internal_params = params[:split]
                 params = params[split+1:]
-                if not self.parse_internal_params(commandname, internal_params):
+                if not self.parse_internal_params(commandname,
+                                                  internal_params):
                     return -1
             except TypeError as e:
                 # early abort due to internal parameters

@@ -1,0 +1,15 @@
+#!/usr/bin/python3
+
+import QdExec
+executor = QdExec.QdExec()
+
+
+@executor.register
+def testfun_minimal(foo: str) -> int:
+    """ function that will echo parameter """
+    print(foo)
+    return 0
+
+
+if __name__ == "__main__":
+    executor.exec_argv_exit()
